@@ -1,24 +1,38 @@
 from PIL import Image, ImageDraw 
 import numpy as np
 import random
-#Example Stats: Width:50, Height:60, Sizeinc: 15, Frames:120, Seed: Sometext
+#Example Stats: Width:50, Height:60, Sizeinc: 15, Frames:120, Weight: 0.5, Seed: Sometext
 images = [] 
 def forceint(string):
-    temp = input(string)
-    while not temp.isnumeric():
-        print("Oops, that's gotta be an integer (1, 43, 576 etc), Please try again")
-        temp = input(string)
-    temp = int(temp)
+    while True:
+        try: 
+            temp = int(input(string))
+        except:
+            print("Oops, that's gotta be an integer (1, 43, 576 etc), Please try again")
+        else:
+            break
     while temp < 5:
         print("Gotta give a bigger number than that :)")
         temp = forceint(string)
     return int(temp)
+def forcedec(string):
+    while True:
+        try: 
+            temp = float(input(string))
+        except:
+            print("Oops, that's gotta be decimal (.1, .4, .7 etc), Please try again")
+        else:
+            break
+    while temp >= 1 or temp <= 0:
+        print("Please give a decimal value between 0 and 1!")
+        temp = forcedec(string)
+    return float(temp)
 width = forceint("Width: ")
 height = forceint("Height: ")
 sizeinc = int(1000/max(width, height))
 frames = forceint("Frame Number: ")
+weight = forcedec("Initial Density: ")
 seed = input("Seed: ")
-weight = 0.2
 oldboard = np.zeros((height, width))
 newboard = oldboard
 def iter2D(f, ymax, xmax):
@@ -73,35 +87,6 @@ def upscale(old, mult):
     return temp
 def addframe(obj):
     images.append(Image.fromarray(upscale(obj, sizeinc)))
-glider = [
-[0,1],
-[0,0,1],
-[1,1,1],
-]
-revglider = [
-[0,1],
-[1],
-[1,1,1]
-]
-obj = [
-[0,0,0,0,1,1],
-[0,0,0,0,1,1,1],
-[0,0,0,0,0,0,0,0,1],
-[0,0,0,0,0,0,1,0,1,1],
-[0,0,0,0,0,0,0,0,0,1,1],
-[0,0,0,0,1,1,1,0,1,1],
-[0,0,0,0,0,0,0,0,1],
-[0,0,0,0,0,0,1],
-[0,0,1],
-[0,1,0,0,0,1],
-[0,0,1,1,0,1,1],
-[0,0,0,0,0,1],
-[1,1,0,1,1],
-]
-#setactivelist(oldboard, [2, 7], obj)
-#setactivelist(oldboard, [2, 51], obj)
-#setactivelist(oldboard, [2, 2], glider)
-#setactivelist(oldboard, [7,0], revglider)
 numseed=0
 for i in range(0, len(seed)):
     numseed+=ord(seed[i])*3**i
@@ -112,12 +97,9 @@ for y in range(0, height):
     for x in range(0, width):
         randCell(y, x)
 addframe(oldboard)
-
-
 for i in range(0, frames-1, 1):   
     oldboard = setframe(oldboard)
     addframe(oldboard)
-
 images[0].save('Game Of Life Simulation.gif', 
                save_all = True, append_images = images[1:],  
                optimize = False,compress_level=9, duration = 10, loop = 0)
